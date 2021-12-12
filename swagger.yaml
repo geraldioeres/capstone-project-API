@@ -1,0 +1,778 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Forum Group Discussion
+  description: This is a swagger documentation for the Final Project
+  license:
+    name: Apache 2.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+tags:
+  - name: users
+    description: Everything about users
+  - name: threads
+    description: Everything about threads
+  - name: categories
+    description: Everything about categories
+  - name: comments
+    description: Everything about comments
+  - name: likes
+    description: Everything about likes
+  - name: learderboards
+    description: Everything about learderboards
+  - name: search
+    description: Everything about search
+  - name: search-2
+    description: Alternative search feature
+
+paths:
+  /register:
+    post:
+      summary: Create a new user
+      tags:
+        - users
+      requestBody:
+        description: Create a new user
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/RegisterRequest"
+                - $ref: "#/components/schemas/Timestamp"
+
+      responses:
+        "201":
+          description: Successfully created user
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      userId:
+                        type: integer
+                      email:
+                        type: string
+                      userName:
+                        type: string
+        "409":
+          description: Username already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /login:
+    post:
+      summary: Logs user into the system
+      tags:
+        - users
+      requestBody:
+        description: Logs user into the system
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Successfully login
+
+  /users/{id}:
+    get:
+      summary: Get user data
+      tags:
+        - users
+      parameters:
+        - name: id
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Successfully Get User data
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/GetUser"
+                  - $ref: "#/components/schemas/Timestamp"
+        "404":
+          description: User Not Found
+          content: {}
+        "500":
+          description: Internal Server Error
+          content: {}
+
+  /users/me:
+    patch:
+      tags:
+        - users
+      summary: Edit user data
+      requestBody:
+        description: Edit user data
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserEdit"
+      responses:
+        "200":
+          description: Successfully edit user data
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/GetUser"
+                  - $ref: "#/components/schemas/Timestamp"
+        "401":
+          description: Unauthorized
+          content: {}
+        "403":
+          description: Forbidden
+          content: {}
+        "500":
+          description: Internal Server Error
+          content: {}
+    delete:
+      tags:
+        - users
+      summary: Delete user data
+      requestBody:
+        description: Using user current password
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                current_password:
+                  type: string
+              required:
+                - current_password
+      responses:
+        "204":
+          description: Not content
+
+  /threads:
+    get:
+      tags:
+        - threads
+      summary: List of threads
+      responses:
+        "200":
+          description: List of threads
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/Thread"
+                    - $ref: "#/components/schemas/Timestamp"
+
+  /threads/create:
+    post:
+      tags:
+        - threads
+      summary: Create a new thread
+      requestBody:
+        description: Create a new thread
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Thread"
+      responses:
+        "200":
+          description: Successfully create thread
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Thread"
+                  - $ref: "#/components/schemas/Timestamp"
+        "401":
+          description: Unauthorized
+          content: {}
+
+  /threads/{thread_id}:
+    parameters:
+      - name: thread_id
+        in: path
+        description: ID of the Thread
+        required: true
+        schema:
+          type: integer
+    get:
+      tags:
+        - threads
+      summary: Get Thread by Thread Id
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Thread"
+                  - $ref: "#/components/schemas/Timestamp"
+        "404":
+          description: Not Found
+          content: {}
+        "500":
+          description: Internal Server Error
+          content: {}
+
+    delete:
+      tags:
+        - threads
+      summary: Delete a Thread
+      responses:
+        "200":
+          description: Successfully deleted Thread
+        "401":
+          description: Unauthorized
+
+  /threads/{thread_id}/edit:
+    patch:
+      tags:
+        - threads
+      summary: Edit existing Thread
+      parameters:
+        - name: thread_id
+          in: path
+          description: ID of the Thread
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: Input the edited data
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ThreadEdit"
+
+      responses:
+        "200":
+          description: Successfully Edited Thread
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Thread"
+                  - $ref: "#/components/schemas/Timestamp"
+
+  /categories:
+    get:
+      tags:
+        - categories
+      summary: List of categories
+      responses:
+        "200":
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/Category"
+                    - $ref: "#/components/schemas/Timestamp"
+        "404":
+          description: Not Found
+          content: {}
+        "500":
+          description: Internal Server Error
+          content: {}
+
+    post:
+      tags:
+        - categories
+      summary: Create a new category
+      requestBody:
+        description: Insert the category name and image
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCategory"
+      responses:
+        "200":
+          description: Successfully Created category
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+        "401":
+          description: Unauthorized
+        "409":
+          description: The Category has been existed
+        "500":
+          description: Internal Server Error
+
+  /categories/{id}:
+    get:
+      tags:
+        - categories
+      summary: Get all thread by category id
+      parameters:
+        - name: id
+          in: path
+          description: Category ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of threads by category id
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/Thread"
+                    - $ref: "#/components/schemas/Timestamp"
+        "404":
+          description: Not Found
+
+  /threads/{thread_id}/comments:
+    get:
+      tags:
+        - comments
+      summary: Get list of recent comment in the thread
+      parameters:
+        - name: thread_id
+          in: path
+          description: ID of the Thread
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of all comments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/Comment"
+                    - $ref: "#/components/schemas/Timestamp"
+
+    post:
+      tags:
+        - comments
+      summary: Create a comment in a thread
+      parameters:
+        - name: thread_id
+          in: path
+          description: ID of the Thread
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                comment:
+                  type: string
+      responses:
+        "200":
+          description: Successfully Created Comment
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Comment"
+                  - $ref: "#/components/schemas/Timestamp"
+        "401":
+          description: Unauthorized
+          content: {}
+
+  /threads/{thread_id}/comments/{comment_id}:
+    delete:
+      tags:
+        - comments
+      summary: Remove comment by the current loggedin user or the admin
+      parameters:
+        - name: thread_id
+          in: path
+          description: ID of the thread
+          required: true
+          schema:
+            type: integer
+        - name: comment_id
+          in: path
+          description: ID of the comment
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Successfully deleted comment
+        "401":
+          description: Unauthorized
+
+  /threads/{thread_id}/likes:
+    get:
+      tags:
+        - likes
+      summary: Get list of likes in the Thread
+      parameters:
+        - name: thread_id
+          in: path
+          description: ID of the thread
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of likes on the Thread
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/Likes"
+                    - $ref: "#/components/schemas/Timestamp"
+
+    post:
+      tags:
+        - likes
+      summary: Like the current Thread
+      parameters:
+        - name: thread_id
+          in: path
+          description: ID of the thread
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Liked a thread
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Comment"
+                  - $ref: "#/components/schemas/Timestamp"
+        "401":
+          description: Unauthorized
+
+    delete:
+      tags:
+        - likes
+      summary: Unlike a Thread by currently loggedin user
+      parameters:
+        - name: thread_id
+          in: path
+          description: Id of the Thread
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Unliked Thread
+        "401":
+          description: Unauthorized
+
+  /leaderboards:
+    get:
+      tags:
+        - learderboards
+      summary: Get learderboards data
+      parameters:
+        - name: limit
+          in: query
+          description: Return top 10 ranks of users by default
+          required: true
+          schema:
+            type: integer
+            enum:
+              - 10
+        - name: sort
+          in: query
+          description: Sort ranks order
+          required: true
+          schema:
+            type: string
+            enum:
+              - desc
+      responses:
+        "200":
+          description: Return list of users ordered by ranks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/GetUser"
+                    - $ref: "#/components/schemas/Timestamp"
+
+  /search:
+    get:
+      tags:
+        - search
+      summary: Search by query
+      parameters:
+        - name: q
+          in: query
+          description: Type what to search
+          required: true
+          schema:
+            type: string
+        - name: type
+          in: query
+          description: Result will be a list of result by type
+          required: false
+          schema:
+            type: string
+            enum:
+              - threads
+              - users
+              - comments
+      responses:
+        "200":
+          description: List of Result
+        "404":
+          description: Not Found
+
+  /users/search:
+    get:
+      tags:
+        - search-2
+      summary: Search user by query
+      parameters:
+        - name: name
+          in: query
+          description: Type username or full name
+          required: true
+          schema:
+            type: string
+        - name: tab
+          in: query
+          description: Filter user by role
+          required: false
+          schema:
+            default: users
+            type: string
+            enum:
+              - users
+              - moderators
+              - admins
+      responses:
+        "200":
+          description: List of Users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/GetUser"
+                    - $ref: "#/components/schemas/Timestamp"
+
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+
+  /threads/search:
+    get:
+      tags:
+        - search-2
+      summary: Search threads by title
+      parameters:
+        - name: title
+          in: query
+          description: Type username or full name
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of Threads
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/Thread"
+                    - $ref: "#/components/schemas/Timestamp"
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+
+components:
+  schemas:
+    UserEdit:
+      type: object
+      properties:
+        full_name:
+          type: string
+          example: user1
+        photo_url:
+          type: string
+        gender:
+          type: string
+          example: Male
+        new_password:
+          type: string
+          example: 12345
+        repeat_password:
+          type: string
+          example: 12345
+        current_password:
+          type: string
+          example: 11111
+
+    Timestamp:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    RegisterRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - username
+        - password
+
+    LoginRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - password
+
+    Thread:
+      type: object
+      properties:
+        threadId:
+          type: integer
+        title:
+          type: string
+        userId:
+          type: integer
+        categoryId:
+          type: integer
+        image_url:
+          type: string
+        content:
+          type: string
+        likes:
+          type: integer
+        dislikes:
+          type: integer
+        comments:
+          type: integer
+
+    ThreadEdit:
+      type: object
+      properties:
+        title:
+          type: string
+        image_url:
+          type: string
+        content:
+          type: string
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        image_url:
+          type: string
+
+    CreateCategory:
+      type: object
+      properties:
+        name:
+          type: string
+        image_url:
+          type: string
+
+    Comment:
+      type: object
+      properties:
+        id:
+          type: integer
+        comment:
+          type: string
+        userId:
+          type: integer
+        threadId:
+          type: integer
+
+    Likes:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        threadId:
+          type: integer
+
+    # Responses
+    GetUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        full_name:
+          type: string
+          example: user1
+        username:
+          type: string
+          example: user12345
+        email:
+          type: string
+          example: user@gmail.com
+        gender:
+          type: string
+          example: male
+        role:
+          type: integer
+          example: 1
+        photo_url:
+          type: string
+        status:
+          type: string
+          example: banned
+
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/geralmers01/FP-Kel-10/1.0.0
+  - url: "https://fp.swagger.io/v1"
